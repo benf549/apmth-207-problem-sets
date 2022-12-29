@@ -1,0 +1,3 @@
+/Users/benjaminfry/Code/fall_2022/apmth207/homework_2/build/CMakeFiles/homework_2.dir
+/Users/benjaminfry/Code/fall_2022/apmth207/homework_2/build/CMakeFiles/edit_cache.dir
+/Users/benjaminfry/Code/fall_2022/apmth207/homework_2/build/CMakeFiles/rebuild_cache.dir

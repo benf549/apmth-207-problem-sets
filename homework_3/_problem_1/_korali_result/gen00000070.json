@@ -1,0 +1,107 @@
+{
+ "Console Output": {
+  "Frequency": 10,
+  "Verbosity": "Normal"
+ },
+ "Current Generation": 70,
+ "File Output": {
+  "Enabled": 1,
+  "Frequency": 10,
+  "Path": "_korali_result",
+  "Use Multiple Files": 1
+ },
+ "Is Finished": 0,
+ "Preserve Random Number Generator States": 0,
+ "Problem": {
+  "Constraints": [],
+  "Has Discrete Variables": 0,
+  "Num Objectives": 1,
+  "Objective Function": 0,
+  "Type": "optimization"
+ },
+ "Random Seed": 1666662449371240256,
+ "Run ID": 1666662449362,
+ "Samples": null,
+ "Solver": {
+  "Best Ever Gradient": [
+   2.057476524851509,
+   2.057476524851509
+  ],
+  "Best Ever Value": -0.004379102946934665,
+  "Best Ever Variables": [
+   -0.0010792673670111663,
+   -0.0010792673670111663
+  ],
+  "Beta1": 0.9,
+  "Beta2": 0.999,
+  "Bias Corrected First Moment": [
+   -0.5846467969040331,
+   -0.5846467969040331
+  ],
+  "Bias Corrected Second Moment": [
+   17.3231563222725,
+   17.3231563222725
+  ],
+  "Current Best Value": -0.0511593559894159,
+  "Current Variable": [
+   0.01114020077195195,
+   0.01114020077195195
+  ],
+  "Epsilon": 1e-08,
+  "Eta": 0.4,
+  "First Moment": [
+   -0.5842804696458794,
+   -0.5842804696458794
+  ],
+  "Gradient": [
+   -2.5913469421953037,
+   -2.5913469421953037
+  ],
+  "Gradient Norm": 3.6647179904666474,
+  "Model Evaluation Count": 70,
+  "Previous Best Value": -0.2912373800293899,
+  "Second Moment": [
+   1.1717181135141173,
+   1.1717181135141173
+  ],
+  "Squared Gradient": [
+   6.715078974824951,
+   6.715078974824951
+  ],
+  "Termination Criteria": {
+   "Max Generations": 100,
+   "Max Gradient Norm": 1000000000000.0,
+   "Max Model Evaluations": 1000000000,
+   "Max Value": Infinity,
+   "Min Gradient Norm": 1e-12,
+   "Min Value Difference Threshold": -Infinity
+  },
+  "Type": "optimizer/Adam",
+  "Variable Count": 2
+ },
+ "Store Sample Information": 0,
+ "Timestamp": "Tue Oct 25 03:47:35 2022",
+ "Type": ".",
+ "Variables": [
+  {
+   "Initial Mean": NaN,
+   "Initial Standard Deviation": NaN,
+   "Initial Value": 5.0,
+   "Lower Bound": -Infinity,
+   "Minimum Standard Deviation Update": 0.0,
+   "Name": "x",
+   "Upper Bound": Infinity,
+   "Values": []
+  },
+  {
+   "Initial Mean": NaN,
+   "Initial Standard Deviation": NaN,
+   "Initial Value": 5.0,
+   "Lower Bound": -Infinity,
+   "Minimum Standard Deviation Update": 0.0,
+   "Name": "y",
+   "Upper Bound": Infinity,
+   "Values": []
+  }
+ ]
+}

@@ -1,0 +1,443 @@
+<html>
+<head>
+<title>main.cpp</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #ddb6f2; font-style: italic;}
+.s1 { color: #d9e0ee;}
+.s2 { color: #abe9b3;}
+.s3 { color: #6e6c7e; font-style: italic;}
+.s4 { color: #f28fad;}
+.s5 { color: #89dceb;}
+.s6 { color: #d9e0ee;}
+.s7 { color: #f8bd96;}
+</style>
+</head>
+<body bgcolor="#1e1e2e">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.cpp</font>
+</center></td></tr></table>
+<pre><span class="s0">#include </span><span class="s2">&lt;iostream&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;fstream&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;sstream&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;vector&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;cmath&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;random&gt;</span>
+
+
+<span class="s3">// Define aliases to save some typing.</span>
+<span class="s4">using </span><span class="s1">std</span><span class="s5">::</span><span class="s1">cout</span><span class="s6">, </span><span class="s1">std</span><span class="s5">::</span><span class="s1">endl</span><span class="s6">, </span><span class="s1">std</span><span class="s5">::</span><span class="s1">vector</span><span class="s6">, </span><span class="s1">std</span><span class="s5">::</span><span class="s1">string</span><span class="s6">, </span><span class="s1">std</span><span class="s5">::</span><span class="s1">stringstream</span><span class="s6">, </span><span class="s1">std</span><span class="s5">::</span><span class="s1">ofstream</span><span class="s6">;</span>
+<span class="s4">using </span><span class="s1">vec_2d </span><span class="s5">= </span><span class="s1">vector</span><span class="s5">&lt;</span><span class="s1">vector</span><span class="s5">&lt;</span><span class="s4">double</span><span class="s5">&gt;&gt;</span><span class="s6">;</span>
+<span class="s4">using </span><span class="s1">vec </span><span class="s5">= </span><span class="s1">vector</span><span class="s5">&lt;</span><span class="s4">double</span><span class="s5">&gt;</span><span class="s6">;</span>
+
+<span class="s3">// Define useful global constants.</span>
+<span class="s4">const int </span><span class="s1">NUM_PEDESTRIANS </span><span class="s5">= </span><span class="s7">10</span><span class="s6">;</span>
+<span class="s4">const int </span><span class="s1">NUM_OBSTACLES </span><span class="s5">= </span><span class="s7">5</span><span class="s6">;</span>
+
+<span class="s3">// Helper print functions for debugging.</span>
+<span class="s4">void </span><span class="s1">print</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">vec</span><span class="s6">) {</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;[&quot;</span><span class="s6">;</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">const auto</span><span class="s5">&amp; </span><span class="s1">i</span><span class="s5">: </span><span class="s1">vec</span><span class="s6">) {</span>
+        <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s1">i </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot;</span><span class="s6">;</span>
+    <span class="s6">}</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;]&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">void </span><span class="s1">print</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vector</span><span class="s5">&lt;</span><span class="s4">int</span><span class="s5">&gt;&amp; </span><span class="s1">vec</span><span class="s6">) {</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;[&quot;</span><span class="s6">;</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">const auto</span><span class="s5">&amp; </span><span class="s1">i</span><span class="s5">: </span><span class="s1">vec</span><span class="s6">) {</span>
+        <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s1">i </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot;</span><span class="s6">;</span>
+    <span class="s6">}</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;]&quot;</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">void </span><span class="s1">print</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">vec</span><span class="s6">) {</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;[ &quot;</span><span class="s6">;</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">const auto</span><span class="s5">&amp; </span><span class="s1">i </span><span class="s5">: </span><span class="s1">vec</span><span class="s6">) {</span>
+        <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;(&quot;</span><span class="s6">;</span>
+
+        <span class="s4">int </span><span class="s1">ctr </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">auto </span><span class="s1">j </span><span class="s5">: </span><span class="s1">i</span><span class="s6">){</span>
+            <span class="s4">if </span><span class="s6">(</span><span class="s1">ctr </span><span class="s5">== </span><span class="s7">0</span><span class="s6">) {</span>
+                <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s1">j </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;,&quot;</span><span class="s6">;</span>
+            <span class="s6">} </span><span class="s4">else </span><span class="s6">{</span>
+                <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s1">j</span><span class="s6">;</span>
+            <span class="s6">}</span>
+            <span class="s1">ctr </span><span class="s5">+= </span><span class="s7">1</span><span class="s6">;</span>
+        <span class="s6">}</span>
+
+        <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;), &quot;</span><span class="s6">;</span>
+    <span class="s6">}</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;] &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">double </span><span class="s1">distance</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">v1</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">v2</span><span class="s6">) {</span>
+    <span class="s4">double </span><span class="s1">out </span><span class="s5">= </span><span class="s1">sqrt</span><span class="s6">( </span><span class="s1">pow</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">[</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s7">0</span><span class="s6">], </span><span class="s7">2</span><span class="s6">) </span><span class="s5">+ </span><span class="s1">pow</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">[</span><span class="s7">1</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s7">1</span><span class="s6">], </span><span class="s7">2</span><span class="s6">));</span>
+    <span class="s4">return </span><span class="s1">out</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">double </span><span class="s1">sq_dist</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">v1</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">v2</span><span class="s6">) {</span>
+    <span class="s4">double </span><span class="s1">out </span><span class="s5">=  </span><span class="s1">pow</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">[</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s7">0</span><span class="s6">], </span><span class="s7">2</span><span class="s6">) </span><span class="s5">+ </span><span class="s1">pow</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">[</span><span class="s7">1</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s7">1</span><span class="s6">], </span><span class="s7">2</span><span class="s6">);</span>
+    <span class="s4">return </span><span class="s1">out</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">double </span><span class="s1">x_displacement</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">v1</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">v2</span><span class="s6">) {</span>
+    <span class="s4">return </span><span class="s1">abs</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">[</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s7">0</span><span class="s6">]);</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d add_vecs</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">v1</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">v2</span><span class="s6">) {</span>
+    <span class="s3">// Sanity check that vectors are same size.</span>
+    <span class="s1">assert</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">() </span><span class="s5">== </span><span class="s1">v2</span><span class="s6">.</span><span class="s1">size</span><span class="s6">());</span>
+    <span class="s3">// Initialize memory for output vector.</span>
+    <span class="s1">vec_2d output </span><span class="s6">(</span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">(), {</span><span class="s7">0</span><span class="s6">,</span><span class="s7">0</span><span class="s6">});</span>
+    <span class="s3">// Add every element of both vectors, save result in output.</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">(); </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">output</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s6">{</span><span class="s1">v1</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">+ </span><span class="s1">v2</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">], </span><span class="s1">v1</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">+ </span><span class="s1">v2</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">]};</span>
+    <span class="s6">}</span>
+    <span class="s4">return </span><span class="s1">output</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d sub_vecs</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">v1</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">v2</span><span class="s6">) {</span>
+    <span class="s3">// Sanity check that vectors are same size.</span>
+    <span class="s1">assert</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">() </span><span class="s5">== </span><span class="s1">v2</span><span class="s6">.</span><span class="s1">size</span><span class="s6">());</span>
+    <span class="s3">// Initialize memory for output vector.</span>
+    <span class="s1">vec_2d output </span><span class="s6">(</span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">(), {</span><span class="s7">0</span><span class="s6">,</span><span class="s7">0</span><span class="s6">});</span>
+    <span class="s3">// Add every element of both vectors, save result in output.</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">(); </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">output</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s6">{</span><span class="s1">v1</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">], </span><span class="s1">v1</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">- </span><span class="s1">v2</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">]};</span>
+    <span class="s6">}</span>
+    <span class="s4">return </span><span class="s1">output</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d scalar_mult_vecs</span><span class="s6">(</span><span class="s4">const double </span><span class="s1">scalar</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">v1</span><span class="s6">) {</span>
+    <span class="s1">vec_2d output</span><span class="s6">(</span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">(), {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">v1</span><span class="s6">.</span><span class="s1">size</span><span class="s6">(); </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">output</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s6">{ </span><span class="s1">scalar </span><span class="s5">* </span><span class="s1">v1</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">], </span><span class="s1">scalar </span><span class="s5">* </span><span class="s1">v1</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">]};</span>
+    <span class="s6">}</span>
+    <span class="s4">return </span><span class="s1">output</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d compute_force_from_trajectories</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">velocities</span><span class="s6">) {</span>
+    <span class="s3">// Trajectory Force Computation Constants</span>
+    <span class="s4">const double </span><span class="s1">tau     </span><span class="s5">=  </span><span class="s7">0.2</span><span class="s6">;</span>
+    <span class="s4">const </span><span class="s1">vec_2d v_0s </span><span class="s6">{</span>
+            <span class="s6">{</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">},</span>
+            <span class="s6">{</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}</span>
+    <span class="s6">};</span>
+
+    <span class="s3">// Subtract velocities and apply scalar multiplication.</span>
+    <span class="s1">vec_2d vec_diff </span><span class="s5">= </span><span class="s1">sub_vecs</span><span class="s6">(</span><span class="s1">v_0s</span><span class="s6">, </span><span class="s1">velocities</span><span class="s6">);</span>
+    <span class="s1">vec_diff </span><span class="s5">= </span><span class="s1">scalar_mult_vecs</span><span class="s6">((</span><span class="s7">1</span><span class="s5">/</span><span class="s1">tau</span><span class="s6">), </span><span class="s1">vec_diff</span><span class="s6">);</span>
+
+    <span class="s4">return </span><span class="s1">vec_diff</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d compute_forces</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">positions</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">obstacle_positions</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">velocities</span><span class="s6">) {</span>
+    <span class="s4">const double </span><span class="s1">A       </span><span class="s5">= </span><span class="s7">20.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">B       </span><span class="s5">=  </span><span class="s7">0.5</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">C       </span><span class="s5">= </span><span class="s7">10.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">D       </span><span class="s5">=  </span><span class="s7">0.6</span><span class="s6">;</span>
+
+    <span class="s1">vec_2d forces </span><span class="s6">(</span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">, {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+
+    <span class="s3">// Compute force from trajectories.</span>
+    <span class="s1">forces </span><span class="s5">= </span><span class="s1">add_vecs</span><span class="s6">(</span><span class="s1">forces</span><span class="s6">, </span><span class="s1">compute_force_from_trajectories</span><span class="s6">(</span><span class="s1">velocities</span><span class="s6">));</span>
+
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s3">// Compute force from other pedestrians.</span>
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">j </span><span class="s5">= </span><span class="s1">i </span><span class="s5">+ </span><span class="s7">1</span><span class="s6">; </span><span class="s1">j </span><span class="s5">&lt; </span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">; </span><span class="s1">j</span><span class="s5">++</span><span class="s6">) {</span>
+            <span class="s4">double </span><span class="s1">r_ij </span><span class="s5">= </span><span class="s1">distance</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">], </span><span class="s1">positions</span><span class="s6">[</span><span class="s1">j</span><span class="s6">]);</span>
+            <span class="s4">double </span><span class="s1">force_coeff </span><span class="s5">= </span><span class="s1">A </span><span class="s5">* </span><span class="s1">exp</span><span class="s6">( </span><span class="s5">-</span><span class="s7">1 </span><span class="s5">* </span><span class="s6">(</span><span class="s1">r_ij </span><span class="s5">/ </span><span class="s1">B</span><span class="s6">));</span>
+            <span class="s4">double </span><span class="s1">x_update </span><span class="s5">= </span><span class="s1">force_coeff </span><span class="s5">* </span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">positions</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s7">0</span><span class="s6">]) </span><span class="s5">/ </span><span class="s1">r_ij</span><span class="s6">;</span>
+            <span class="s4">double </span><span class="s1">y_update </span><span class="s5">= </span><span class="s1">force_coeff </span><span class="s5">* </span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">- </span><span class="s1">positions</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s7">1</span><span class="s6">]) </span><span class="s5">/ </span><span class="s1">r_ij</span><span class="s6">;</span>
+            <span class="s1">forces</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">+= </span><span class="s1">x_update</span><span class="s6">;</span>
+            <span class="s1">forces</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">+= </span><span class="s1">y_update</span><span class="s6">;</span>
+            <span class="s1">forces</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">+= -</span><span class="s7">1 </span><span class="s5">* </span><span class="s1">x_update</span><span class="s6">;</span>
+            <span class="s1">forces</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">+= -</span><span class="s7">1 </span><span class="s5">* </span><span class="s1">y_update</span><span class="s6">;</span>
+        <span class="s6">}</span>
+
+        <span class="s3">// Compute force from obstacles.</span>
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">k </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">k </span><span class="s5">&lt; </span><span class="s1">NUM_OBSTACLES</span><span class="s6">; </span><span class="s1">k</span><span class="s5">++</span><span class="s6">) {</span>
+            <span class="s4">double </span><span class="s1">r_ik </span><span class="s5">= </span><span class="s1">distance</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">], </span><span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">k</span><span class="s6">]);</span>
+            <span class="s4">double </span><span class="s1">force_coeff </span><span class="s5">= </span><span class="s1">C </span><span class="s5">* </span><span class="s1">exp</span><span class="s6">(</span><span class="s5">-</span><span class="s7">1 </span><span class="s5">* </span><span class="s6">(</span><span class="s1">r_ik </span><span class="s5">/ </span><span class="s1">D</span><span class="s6">));</span>
+            <span class="s1">forces</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">+= </span><span class="s1">force_coeff </span><span class="s5">* </span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">k</span><span class="s6">][</span><span class="s7">0</span><span class="s6">]) </span><span class="s5">/ </span><span class="s1">r_ik</span><span class="s6">;</span>
+            <span class="s1">forces</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">+= </span><span class="s1">force_coeff </span><span class="s5">* </span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">- </span><span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">k</span><span class="s6">][</span><span class="s7">1</span><span class="s6">]) </span><span class="s5">/ </span><span class="s1">r_ik</span><span class="s6">;</span>
+        <span class="s6">}</span>
+    <span class="s6">}</span>
+    <span class="s4">return </span><span class="s1">forces</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d enforce_boundaries</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">positions</span><span class="s6">) {</span>
+    <span class="s4">const double </span><span class="s1">xmax </span><span class="s5">=  </span><span class="s7">30.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">xmin </span><span class="s5">= -</span><span class="s7">30.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">ymax </span><span class="s5">=   </span><span class="s7">3.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">ymin </span><span class="s5">=  -</span><span class="s7">3.0</span><span class="s6">;</span>
+
+    <span class="s1">vec_2d bounded_pos</span><span class="s6">(</span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">, {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">bounded_pos</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">= </span><span class="s1">fmin</span><span class="s6">(</span><span class="s1">fmax</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">], </span><span class="s1">xmin</span><span class="s6">), </span><span class="s1">xmax</span><span class="s6">);</span>
+        <span class="s1">bounded_pos</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">= </span><span class="s1">fmin</span><span class="s6">(</span><span class="s1">fmax</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">], </span><span class="s1">ymin</span><span class="s6">), </span><span class="s1">ymax</span><span class="s6">);</span>
+    <span class="s6">}</span>
+
+    <span class="s4">return </span><span class="s1">bounded_pos</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">void </span><span class="s1">apply_time_step</span><span class="s6">(</span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">positions</span><span class="s6">, </span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">obstacle_positions</span><span class="s6">, </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">velocities</span><span class="s6">, </span><span class="s4">const double </span><span class="s1">delta_t</span><span class="s6">) {</span>
+    <span class="s3">// Step positions in direction of velocities.</span>
+    <span class="s1">positions </span><span class="s5">= </span><span class="s1">add_vecs</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">, </span><span class="s1">scalar_mult_vecs</span><span class="s6">(</span><span class="s1">delta_t</span><span class="s6">, </span><span class="s1">velocities</span><span class="s6">));</span>
+    <span class="s1">positions </span><span class="s5">= </span><span class="s1">enforce_boundaries</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">);</span>
+
+    <span class="s3">// Step velocities in direction of forces.</span>
+    <span class="s1">vec_2d forces </span><span class="s5">= </span><span class="s1">compute_forces</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">, </span><span class="s1">obstacle_positions</span><span class="s6">, </span><span class="s1">velocities</span><span class="s6">);</span>
+    <span class="s1">velocities </span><span class="s5">= </span><span class="s1">add_vecs</span><span class="s6">(</span><span class="s1">velocities</span><span class="s6">, </span><span class="s1">scalar_mult_vecs</span><span class="s6">(</span><span class="s1">delta_t</span><span class="s6">, </span><span class="s1">forces</span><span class="s6">));</span>
+<span class="s6">}</span>
+
+<span class="s4">void </span><span class="s1">log_positions</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">positions</span><span class="s6">, </span><span class="s4">bool </span><span class="s1">is_first_line </span><span class="s5">= </span><span class="s4">false</span><span class="s6">) {</span>
+    <span class="s1">ofstream output_file</span><span class="s6">;</span>
+
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">stringstream fname</span><span class="s6">;</span>
+        <span class="s1">fname </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;particle_&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">i </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;.log&quot;</span><span class="s6">;</span>
+
+        <span class="s4">if </span><span class="s6">(</span><span class="s1">is_first_line</span><span class="s6">) {</span>
+            <span class="s3">// Deletes file from previous run.</span>
+            <span class="s1">output_file</span><span class="s6">.</span><span class="s1">open</span><span class="s6">(</span><span class="s1">fname</span><span class="s6">.</span><span class="s1">str</span><span class="s6">());</span>
+        <span class="s6">} </span><span class="s4">else </span><span class="s6">{</span>
+            <span class="s3">// Append if not first line.</span>
+            <span class="s1">output_file</span><span class="s6">.</span><span class="s1">open</span><span class="s6">(</span><span class="s1">fname</span><span class="s6">.</span><span class="s1">str</span><span class="s6">(), </span><span class="s1">std</span><span class="s5">::</span><span class="s1">ios_base</span><span class="s5">::</span><span class="s1">app</span><span class="s6">);</span>
+        <span class="s6">}</span>
+
+        <span class="s1">output_file </span><span class="s5">&lt;&lt; </span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;,&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+        <span class="s1">output_file</span><span class="s6">.</span><span class="s1">close</span><span class="s6">();</span>
+    <span class="s6">}</span>
+<span class="s6">}</span>
+
+<span class="s4">double </span><span class="s1">run_model</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">obstacle_positions</span><span class="s6">, </span><span class="s4">bool </span><span class="s1">log_pos </span><span class="s5">= </span><span class="s4">false</span><span class="s6">) {</span>
+    <span class="s3">// Setup Constants</span>
+    <span class="s4">const double </span><span class="s1">max_time </span><span class="s5">= </span><span class="s7">50.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">delta_t </span><span class="s5">= </span><span class="s7">0.05</span><span class="s6">;</span>
+    <span class="s4">const </span><span class="s1">vec_2d initial_positions </span><span class="s6">{</span>
+            <span class="s6">{</span><span class="s5">-</span><span class="s7">28.5</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">27.0</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">25.5</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">24.0</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">22.5</span><span class="s6">, </span><span class="s7">0</span><span class="s6">},</span>
+            <span class="s6">{ </span><span class="s7">22.5</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, { </span><span class="s7">24.0</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, { </span><span class="s7">25.5</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, { </span><span class="s7">27.0</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, { </span><span class="s7">28.5</span><span class="s6">, </span><span class="s7">0</span><span class="s6">},</span>
+    <span class="s6">};</span>
+
+    <span class="s3">// Initialize vector of positions to initial positions.</span>
+    <span class="s1">vec_2d positions</span><span class="s6">(</span><span class="s1">initial_positions</span><span class="s6">);</span>
+    <span class="s3">// Initialize velocities to ideal velocity.</span>
+    <span class="s1">vec_2d velocities </span><span class="s6">{</span>
+            <span class="s6">{</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">},</span>
+            <span class="s6">{</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}, {</span><span class="s5">-</span><span class="s7">1</span><span class="s6">, </span><span class="s7">0</span><span class="s6">}</span>
+    <span class="s6">};</span>
+
+    <span class="s3">// Run simulation for 60.00 / 0.05 time steps.</span>
+    <span class="s4">double </span><span class="s1">curr_time </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+    <span class="s4">if </span><span class="s6">(</span><span class="s1">log_pos</span><span class="s6">) {</span>
+        <span class="s1">log_positions</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">, </span><span class="s4">true</span><span class="s6">);</span>
+    <span class="s6">}</span>
+    <span class="s4">while </span><span class="s6">(</span><span class="s1">curr_time </span><span class="s5">&lt; </span><span class="s1">max_time</span><span class="s6">) {</span>
+        <span class="s1">apply_time_step</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">, </span><span class="s1">obstacle_positions</span><span class="s6">, </span><span class="s1">velocities</span><span class="s6">, </span><span class="s1">delta_t</span><span class="s6">);</span>
+        <span class="s4">if </span><span class="s6">(</span><span class="s1">log_pos</span><span class="s6">) {</span>
+            <span class="s1">log_positions</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">);</span>
+        <span class="s6">}</span>
+        <span class="s1">curr_time </span><span class="s5">+= </span><span class="s1">delta_t</span><span class="s6">;</span>
+    <span class="s6">}</span>
+
+    <span class="s3">// Compute average displacement.</span>
+    <span class="s4">double </span><span class="s1">avg_displacement </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">avg_displacement </span><span class="s5">+= </span><span class="s1">x_displacement</span><span class="s6">(</span><span class="s1">positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">], </span><span class="s1">initial_positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">]);</span>
+    <span class="s6">}</span>
+    <span class="s1">avg_displacement </span><span class="s5">/= </span><span class="s1">NUM_PEDESTRIANS</span><span class="s6">;</span>
+
+    <span class="s4">return </span><span class="s1">avg_displacement</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d generate_obstacle_positions</span><span class="s6">(</span><span class="s1">std</span><span class="s5">::</span><span class="s1">mt19937</span><span class="s5">&amp; </span><span class="s1">gen</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_xmax</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_xmin</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_ymax</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_ymin</span><span class="s6">, </span><span class="s4">double </span><span class="s1">radius</span><span class="s6">) {</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">uniform_real_distribution</span><span class="s5">&lt;</span><span class="s4">double</span><span class="s5">&gt; </span><span class="s1">x_uniform</span><span class="s6">(</span><span class="s1">rect_xmin </span><span class="s5">+ </span><span class="s1">radius</span><span class="s6">, </span><span class="s1">rect_xmax </span><span class="s5">- </span><span class="s1">radius</span><span class="s6">);</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">uniform_real_distribution</span><span class="s5">&lt;</span><span class="s4">double</span><span class="s5">&gt; </span><span class="s1">y_uniform</span><span class="s6">(</span><span class="s1">rect_ymin </span><span class="s5">+ </span><span class="s1">radius</span><span class="s6">, </span><span class="s1">rect_ymax </span><span class="s5">- </span><span class="s1">radius</span><span class="s6">);</span>
+
+    <span class="s3">// Initialize 2D vec to hold obstacle positions.</span>
+    <span class="s1">vec_2d obstacle_positions </span><span class="s6">(</span><span class="s1">NUM_OBSTACLES</span><span class="s6">, {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+
+    <span class="s4">int </span><span class="s1">accepted_samples </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+    <span class="s4">while </span><span class="s6">(</span><span class="s1">accepted_samples </span><span class="s5">&lt; </span><span class="s1">NUM_OBSTACLES</span><span class="s6">) {</span>
+        <span class="s3">// Sample a position inside the obstacle box.</span>
+        <span class="s1">vec proposal_posn </span><span class="s5">= </span><span class="s6">{</span><span class="s1">x_uniform</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">), </span><span class="s1">y_uniform</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">)};</span>
+        <span class="s4">bool </span><span class="s1">accept_proposal </span><span class="s5">= </span><span class="s4">true</span><span class="s6">;</span>
+        <span class="s3">// Determine whether to accept this proposal for the seeding.</span>
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">accepted_samples</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+            <span class="s4">if </span><span class="s6">( </span><span class="s1">sq_dist</span><span class="s6">(</span><span class="s1">proposal_posn</span><span class="s6">, </span><span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">]) </span><span class="s5">&lt; </span><span class="s1">pow</span><span class="s6">( (</span><span class="s7">2 </span><span class="s5">* </span><span class="s1">radius</span><span class="s6">), </span><span class="s7">2</span><span class="s6">) ) {</span>
+                <span class="s3">// If the proposal position overlaps with any of the previously created obstacles, try another sample.</span>
+                <span class="s1">accept_proposal </span><span class="s5">= </span><span class="s4">false</span><span class="s6">;</span>
+                <span class="s4">break</span><span class="s6">;</span>
+            <span class="s6">}</span>
+        <span class="s6">}</span>
+        <span class="s3">// If we keep this obstacle position, record 2D vector in positions matrix.</span>
+        <span class="s4">if </span><span class="s6">(</span><span class="s1">accept_proposal</span><span class="s6">) {</span>
+            <span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">accepted_samples</span><span class="s6">] </span><span class="s5">= </span><span class="s1">proposal_posn</span><span class="s6">;</span>
+            <span class="s1">accepted_samples </span><span class="s5">+= </span><span class="s7">1</span><span class="s6">;</span>
+        <span class="s6">}</span>
+    <span class="s6">}</span>
+
+    <span class="s4">return </span><span class="s1">obstacle_positions</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s1">vector</span><span class="s5">&lt;</span><span class="s4">int</span><span class="s5">&gt; </span><span class="s1">select_3_from_NP</span><span class="s6">(</span><span class="s4">const int </span><span class="s1">NP</span><span class="s6">, </span><span class="s1">std</span><span class="s5">::</span><span class="s1">mt19937</span><span class="s5">&amp; </span><span class="s1">gen</span><span class="s6">, </span><span class="s4">const int </span><span class="s1">curr</span><span class="s6">) {</span>
+    <span class="s3">// Selects 3 unique indices from the set of all vectors.</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">uniform_int_distribution</span><span class="s5">&lt;&gt; </span><span class="s1">rand_idx</span><span class="s6">(</span><span class="s7">0</span><span class="s6">, </span><span class="s1">NP </span><span class="s5">- </span><span class="s7">1</span><span class="s6">);</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">vector</span><span class="s5">&lt;</span><span class="s4">int</span><span class="s5">&gt; </span><span class="s1">output_vec</span><span class="s6">(</span><span class="s7">3</span><span class="s6">, </span><span class="s7">0</span><span class="s6">);</span>
+
+    <span class="s4">int </span><span class="s1">curr_idx </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+    <span class="s4">while </span><span class="s6">(</span><span class="s1">curr_idx </span><span class="s5">&lt; </span><span class="s1">output_vec</span><span class="s6">.</span><span class="s1">size</span><span class="s6">()) {</span>
+        <span class="s4">int </span><span class="s1">proposal_idx </span><span class="s5">= </span><span class="s1">rand_idx</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">);</span>
+        <span class="s4">bool </span><span class="s1">accept_idx </span><span class="s5">= </span><span class="s4">true</span><span class="s6">;</span>
+
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">curr_idx</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+            <span class="s4">if </span><span class="s6">(</span><span class="s1">output_vec</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">== </span><span class="s1">proposal_idx</span><span class="s6">) {</span>
+                <span class="s1">accept_idx </span><span class="s5">= </span><span class="s4">false</span><span class="s6">;</span>
+                <span class="s4">break</span><span class="s6">;</span>
+            <span class="s6">}</span>
+        <span class="s6">}</span>
+        <span class="s4">if </span><span class="s6">(</span><span class="s1">accept_idx </span><span class="s4">and </span><span class="s1">proposal_idx </span><span class="s5">!= </span><span class="s1">curr</span><span class="s6">) {</span>
+            <span class="s1">output_vec</span><span class="s6">[</span><span class="s1">curr_idx</span><span class="s6">] </span><span class="s5">= </span><span class="s1">proposal_idx</span><span class="s6">;</span>
+            <span class="s1">curr_idx </span><span class="s5">+= </span><span class="s7">1</span><span class="s6">;</span>
+        <span class="s6">}</span>
+    <span class="s6">}</span>
+    <span class="s4">return </span><span class="s1">output_vec</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">double </span><span class="s1">compute_overlap_and_oob_penalty</span><span class="s6">(</span><span class="s4">const </span><span class="s1">vec_2d</span><span class="s5">&amp; </span><span class="s1">obstacle_positions</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_xmax</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_xmin</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_ymax</span><span class="s6">, </span><span class="s4">double </span><span class="s1">rect_ymin</span><span class="s6">, </span><span class="s4">double </span><span class="s1">radius</span><span class="s6">) {</span>
+    <span class="s4">bool </span><span class="s1">apply_penalty </span><span class="s5">= </span><span class="s4">false</span><span class="s6">;</span>
+
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NUM_OBSTACLES</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s4">const </span><span class="s1">vec</span><span class="s5">&amp; </span><span class="s1">position </span><span class="s5">= </span><span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">i</span><span class="s6">];</span>
+        <span class="s3">// Ensure vector is within bounds.</span>
+        <span class="s4">if </span><span class="s6">((</span><span class="s1">position</span><span class="s6">[</span><span class="s7">0</span><span class="s6">] </span><span class="s5">- </span><span class="s1">radius </span><span class="s5">&lt; </span><span class="s1">rect_xmin</span><span class="s6">) </span><span class="s4">or </span><span class="s6">(</span><span class="s1">position</span><span class="s6">[</span><span class="s7">0</span><span class="s6">] </span><span class="s5">+ </span><span class="s1">radius </span><span class="s5">&gt; </span><span class="s1">rect_xmax</span><span class="s6">) </span><span class="s4">or </span><span class="s6">(</span><span class="s1">position</span><span class="s6">[</span><span class="s7">1</span><span class="s6">] </span><span class="s5">- </span><span class="s1">radius </span><span class="s5">&lt; </span><span class="s1">rect_ymin</span><span class="s6">) </span><span class="s4">or </span><span class="s6">(</span><span class="s1">position</span><span class="s6">[</span><span class="s7">1</span><span class="s6">] </span><span class="s5">+ </span><span class="s1">radius </span><span class="s5">&gt; </span><span class="s1">rect_ymax</span><span class="s6">)) {</span>
+            <span class="s1">apply_penalty </span><span class="s5">= </span><span class="s4">true</span><span class="s6">;</span>
+            <span class="s4">break</span><span class="s6">;</span>
+        <span class="s6">}</span>
+
+        <span class="s3">// Ensure does not clash with any other vectors.</span>
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">j </span><span class="s5">= </span><span class="s1">i </span><span class="s5">+ </span><span class="s7">1</span><span class="s6">; </span><span class="s1">j </span><span class="s5">&lt; </span><span class="s1">NUM_OBSTACLES</span><span class="s6">; </span><span class="s1">j</span><span class="s5">++</span><span class="s6">) {</span>
+            <span class="s4">if </span><span class="s6">( </span><span class="s1">sq_dist</span><span class="s6">(</span><span class="s1">position</span><span class="s6">, </span><span class="s1">obstacle_positions</span><span class="s6">[</span><span class="s1">j</span><span class="s6">]) </span><span class="s5">&lt; </span><span class="s1">pow</span><span class="s6">( (</span><span class="s1">radius </span><span class="s5">* </span><span class="s7">2</span><span class="s6">), </span><span class="s7">2</span><span class="s6">) ) {</span>
+                <span class="s1">apply_penalty </span><span class="s5">= </span><span class="s4">true</span><span class="s6">;</span>
+                <span class="s4">break</span><span class="s6">;</span>
+            <span class="s6">}</span>
+        <span class="s6">}</span>
+        <span class="s4">if </span><span class="s6">(</span><span class="s1">apply_penalty</span><span class="s6">) {</span>
+            <span class="s4">break</span><span class="s6">;</span>
+        <span class="s6">}</span>
+    <span class="s6">}</span>
+
+    <span class="s4">if </span><span class="s6">(</span><span class="s1">apply_penalty</span><span class="s6">) {</span>
+        <span class="s3">// Return very negative penalty for overlapping or out of bounds barriers since we want to maximize average distance.</span>
+        <span class="s4">return </span><span class="s5">-</span><span class="s7">100000.0</span><span class="s6">;</span>
+    <span class="s6">} </span><span class="s4">else </span><span class="s6">{</span>
+        <span class="s4">return </span><span class="s7">0.0</span><span class="s6">;</span>
+    <span class="s6">}</span>
+<span class="s6">}</span>
+
+<span class="s1">vec_2d run_differential_evolution</span><span class="s6">() {</span>
+    <span class="s3">// Obstacle Rectangle Constants (with 10, height 6)</span>
+    <span class="s4">const double </span><span class="s1">rect_xmax </span><span class="s5">= </span><span class="s7">5.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">rect_xmin </span><span class="s5">= -</span><span class="s7">5.0</span><span class="s6">;</span>
+
+    <span class="s4">const double </span><span class="s1">rect_ymax </span><span class="s5">= </span><span class="s7">3.0</span><span class="s6">;</span>
+    <span class="s4">const double </span><span class="s1">rect_ymin </span><span class="s5">= -</span><span class="s7">3.0</span><span class="s6">;</span>
+
+    <span class="s4">const double </span><span class="s1">radius </span><span class="s5">= </span><span class="s7">0.6</span><span class="s6">;</span>
+
+    <span class="s3">// Initialize RNGs.</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">random_device rd</span><span class="s6">;</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">mt19937 gen</span><span class="s6">(</span><span class="s1">rd</span><span class="s6">());</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">uniform_real_distribution</span><span class="s5">&lt;</span><span class="s4">double</span><span class="s5">&gt; </span><span class="s1">randb</span><span class="s6">(</span><span class="s7">0</span><span class="s6">, </span><span class="s7">1</span><span class="s6">);</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">uniform_int_distribution rnbr_vec</span><span class="s6">(</span><span class="s7">0</span><span class="s6">, </span><span class="s1">NUM_OBSTACLES </span><span class="s5">- </span><span class="s7">1</span><span class="s6">);</span>
+    <span class="s1">std</span><span class="s5">::</span><span class="s1">uniform_int_distribution rnbr_idx</span><span class="s6">(</span><span class="s7">0</span><span class="s6">, </span><span class="s7">2</span><span class="s6">);</span>
+
+    <span class="s3">// Define DE constants.</span>
+    <span class="s4">int </span><span class="s1">dim </span><span class="s5">= </span><span class="s1">NUM_OBSTACLES </span><span class="s5">* </span><span class="s7">2</span><span class="s6">;</span>
+    <span class="s4">int </span><span class="s1">NP </span><span class="s5">= </span><span class="s7">7 </span><span class="s5">* </span><span class="s1">dim</span><span class="s6">;</span>
+    <span class="s4">double </span><span class="s1">F </span><span class="s5">= </span><span class="s7">0.5</span><span class="s6">;</span>
+    <span class="s4">double </span><span class="s1">CR </span><span class="s5">= </span><span class="s7">0.1</span><span class="s6">;</span>
+    <span class="s4">int </span><span class="s1">max_generations </span><span class="s5">= </span><span class="s7">1000</span><span class="s6">;</span>
+
+    <span class="s3">// Initialize a matrix (all_vectors) to hold the [NP x 5 x 2] data</span>
+    <span class="s1">vec_2d zeros</span><span class="s6">(</span><span class="s1">NUM_OBSTACLES</span><span class="s6">, {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+    <span class="s1">vector</span><span class="s5">&lt;</span><span class="s1">vec_2d</span><span class="s5">&gt; </span><span class="s1">all_vectors</span><span class="s6">(</span><span class="s1">NP</span><span class="s6">, </span><span class="s1">zeros</span><span class="s6">);</span>
+    <span class="s1">vec curr_displacements</span><span class="s6">(</span><span class="s1">NP</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">);</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NP</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s1">generate_obstacle_positions</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">, </span><span class="s1">rect_xmax</span><span class="s6">, </span><span class="s1">rect_xmin</span><span class="s6">, </span><span class="s1">rect_ymax</span><span class="s6">, </span><span class="s1">rect_ymin</span><span class="s6">, </span><span class="s1">radius</span><span class="s6">);</span>
+        <span class="s1">curr_displacements</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s1">run_model</span><span class="s6">(</span><span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">i</span><span class="s6">]);</span>
+    <span class="s6">}</span>
+
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">epoch </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">epoch </span><span class="s5">&lt; </span><span class="s1">max_generations</span><span class="s6">; </span><span class="s1">epoch</span><span class="s5">++</span><span class="s6">) {</span>
+        <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;epoch: &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">epoch </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, best: &quot; </span><span class="s5">&lt;&lt; *</span><span class="s1">std</span><span class="s5">::</span><span class="s1">max_element</span><span class="s6">(</span><span class="s1">curr_displacements</span><span class="s6">.</span><span class="s1">begin</span><span class="s6">(), </span><span class="s1">curr_displacements</span><span class="s6">.</span><span class="s1">end</span><span class="s6">()) </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+        <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">i </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">i </span><span class="s5">&lt; </span><span class="s1">NP</span><span class="s6">; </span><span class="s1">i</span><span class="s5">++</span><span class="s6">) {</span>
+            <span class="s1">vec_2d original_vec </span><span class="s5">= </span><span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">i</span><span class="s6">];</span>
+
+            <span class="s3">// Apply Mutation.</span>
+            <span class="s3">// Select three non-redundant indices that aren't index i.</span>
+            <span class="s1">vector</span><span class="s5">&lt;</span><span class="s4">int</span><span class="s5">&gt; </span><span class="s1">idx_vector </span><span class="s5">= </span><span class="s1">select_3_from_NP</span><span class="s6">(</span><span class="s1">NP</span><span class="s6">, </span><span class="s1">gen</span><span class="s6">, </span><span class="s1">i</span><span class="s6">);</span>
+            <span class="s3">// Compute X1 + F * (X2 - X3)</span>
+            <span class="s1">vec_2d mut_vec </span><span class="s5">= </span><span class="s1">add_vecs</span><span class="s6">(</span><span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">idx_vector</span><span class="s6">[</span><span class="s7">0</span><span class="s6">]], </span><span class="s1">scalar_mult_vecs</span><span class="s6">(</span><span class="s1">F</span><span class="s6">, </span><span class="s1">sub_vecs</span><span class="s6">(</span><span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">idx_vector</span><span class="s6">[</span><span class="s7">1</span><span class="s6">]], </span><span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">idx_vector</span><span class="s6">[</span><span class="s7">2</span><span class="s6">]])));</span>
+
+            <span class="s3">// Apply Cross-Over.</span>
+            <span class="s1">vec_2d new_vec</span><span class="s6">(</span><span class="s1">NUM_OBSTACLES</span><span class="s6">, {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+            <span class="s4">int </span><span class="s1">keep_new_vec </span><span class="s5">= </span><span class="s1">rnbr_vec</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">);</span>
+            <span class="s4">int </span><span class="s1">keep_new_idx </span><span class="s5">= </span><span class="s1">rnbr_idx</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">);</span>
+
+            <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">j </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">j </span><span class="s5">&lt; </span><span class="s1">NUM_OBSTACLES</span><span class="s6">; </span><span class="s1">j</span><span class="s5">++</span><span class="s6">) {</span>
+                <span class="s4">for </span><span class="s6">(</span><span class="s4">int </span><span class="s1">k </span><span class="s5">= </span><span class="s7">0</span><span class="s6">; </span><span class="s1">k </span><span class="s5">&lt; </span><span class="s7">2</span><span class="s6">; </span><span class="s1">k</span><span class="s5">++</span><span class="s6">) {</span>
+                    <span class="s4">if </span><span class="s6">(</span><span class="s1">randb</span><span class="s6">(</span><span class="s1">gen</span><span class="s6">) </span><span class="s5">&lt;= </span><span class="s1">CR </span><span class="s4">or </span><span class="s6">(</span><span class="s1">keep_new_vec </span><span class="s5">== </span><span class="s1">j </span><span class="s4">and </span><span class="s1">keep_new_idx </span><span class="s5">== </span><span class="s1">k</span><span class="s6">)) {</span>
+                        <span class="s1">new_vec</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s1">k</span><span class="s6">] </span><span class="s5">= </span><span class="s1">mut_vec</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s1">k</span><span class="s6">];</span>
+                    <span class="s6">} </span><span class="s4">else </span><span class="s6">{</span>
+                        <span class="s1">new_vec</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s1">k</span><span class="s6">] </span><span class="s5">= </span><span class="s1">original_vec</span><span class="s6">[</span><span class="s1">j</span><span class="s6">][</span><span class="s1">k</span><span class="s6">];</span>
+                    <span class="s6">}</span>
+                <span class="s6">}</span>
+            <span class="s6">}</span>
+
+            <span class="s3">// Selection.</span>
+            <span class="s4">double </span><span class="s1">trial_avg_displacement </span><span class="s5">= </span><span class="s1">run_model</span><span class="s6">(</span><span class="s1">new_vec</span><span class="s6">);</span>
+            <span class="s1">trial_avg_displacement </span><span class="s5">+= </span><span class="s1">compute_overlap_and_oob_penalty</span><span class="s6">(</span><span class="s1">new_vec</span><span class="s6">, </span><span class="s1">rect_xmax</span><span class="s6">, </span><span class="s1">rect_xmin</span><span class="s6">, </span><span class="s1">rect_ymax</span><span class="s6">, </span><span class="s1">rect_ymin</span><span class="s6">, </span><span class="s1">radius</span><span class="s6">);</span>
+            <span class="s4">if </span><span class="s6">(</span><span class="s1">curr_displacements</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">&lt; </span><span class="s1">trial_avg_displacement</span><span class="s6">) {</span>
+                <span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s1">new_vec</span><span class="s6">;</span>
+                <span class="s1">curr_displacements</span><span class="s6">[</span><span class="s1">i</span><span class="s6">] </span><span class="s5">= </span><span class="s1">trial_avg_displacement</span><span class="s6">;</span>
+            <span class="s6">}</span>
+        <span class="s6">}</span>
+    <span class="s6">}</span>
+
+    <span class="s4">double </span><span class="s1">max </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+    <span class="s1">vec_2d best_vec </span><span class="s6">(</span><span class="s7">5</span><span class="s6">, {</span><span class="s7">0.0</span><span class="s6">, </span><span class="s7">0.0</span><span class="s6">});</span>
+    <span class="s4">int </span><span class="s1">ctr </span><span class="s5">= </span><span class="s7">0</span><span class="s6">;</span>
+    <span class="s4">for </span><span class="s6">(</span><span class="s4">auto </span><span class="s1">disp</span><span class="s5">: </span><span class="s1">curr_displacements</span><span class="s6">) {</span>
+        <span class="s4">if </span><span class="s6">(</span><span class="s1">max </span><span class="s5">&lt; </span><span class="s1">disp</span><span class="s6">) {</span>
+            <span class="s1">best_vec </span><span class="s5">= </span><span class="s1">all_vectors</span><span class="s6">[</span><span class="s1">ctr</span><span class="s6">];</span>
+            <span class="s1">max </span><span class="s5">= </span><span class="s1">disp</span><span class="s6">;</span>
+        <span class="s6">}</span>
+        <span class="s1">ctr </span><span class="s5">+= </span><span class="s7">1</span><span class="s6">;</span>
+    <span class="s6">}</span>
+    <span class="s4">return </span><span class="s1">best_vec</span><span class="s6">;</span>
+<span class="s6">}</span>
+
+<span class="s4">int </span><span class="s1">main</span><span class="s6">() {</span>
+    <span class="s1">vec_2d best_vec </span><span class="s5">= </span><span class="s1">run_differential_evolution</span><span class="s6">();</span>
+    <span class="s1">print</span><span class="s6">(</span><span class="s1">best_vec</span><span class="s6">);</span>
+    <span class="s4">double </span><span class="s1">best_displacement </span><span class="s5">= </span><span class="s1">run_model</span><span class="s6">(</span><span class="s1">best_vec</span><span class="s6">, </span><span class="s4">true</span><span class="s6">);</span>
+    <span class="s1">cout </span><span class="s5">&lt;&lt; </span><span class="s1">best_displacement </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+    <span class="s1">ofstream output_file</span><span class="s6">;</span>
+    <span class="s1">output_file</span><span class="s6">.</span><span class="s1">open</span><span class="s6">(</span><span class="s2">&quot;differential_evolution_1000.txt&quot;</span><span class="s6">);</span>
+    <span class="s1">output_file </span><span class="s5">&lt;&lt; </span><span class="s1">best_displacement </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+    <span class="s1">output_file </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;[(&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">0</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">0</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;), &quot;</span>
+        <span class="s5">&lt;&lt; </span><span class="s2">&quot;(&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">1</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">1</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;), &quot;</span>
+        <span class="s5">&lt;&lt; </span><span class="s2">&quot;(&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">2</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">2</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;), &quot;</span>
+        <span class="s5">&lt;&lt; </span><span class="s2">&quot;(&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">3</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">3</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;), &quot;</span>
+        <span class="s5">&lt;&lt; </span><span class="s2">&quot;(&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">4</span><span class="s6">][</span><span class="s7">0</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;, &quot; </span><span class="s5">&lt;&lt; </span><span class="s1">best_vec</span><span class="s6">[</span><span class="s7">4</span><span class="s6">][</span><span class="s7">1</span><span class="s6">] </span><span class="s5">&lt;&lt; </span><span class="s2">&quot;)]&quot; </span><span class="s5">&lt;&lt; </span><span class="s1">endl</span><span class="s6">;</span>
+
+    <span class="s4">return </span><span class="s7">0</span><span class="s6">;</span>
+<span class="s6">}</span>
+</pre>
+</body>
+</html>
